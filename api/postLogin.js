@@ -2,7 +2,6 @@ import axios from "axios";
 
 const PostLogin = async(userObj) => {
     try{
-        userObj["pushToken"] = "ExponentPushToken[PPLxYvHrsVWa6ixvvFZqZE]"
         const resp = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/login`, userObj);
         console.log("resp",resp)
         return {
