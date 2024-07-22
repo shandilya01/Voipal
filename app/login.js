@@ -44,7 +44,7 @@ export default function Login(){
     const [email ,setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
-    const [pushToken, setPushToken] = useState("")
+    const [pushToken, setPushToken] = useState("") // to be changed later
 
     useEffect(()=>{
         // ask for permissions

@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const PushCallNotification = async(userId) => {
+const PushCallNotification = async(userId, peerId) => {
     try{
-        const resp = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/pushCallNotification`, userId);
+        const resp = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/pushCallNotification`, {params:{peerId:peerId, userId:userId}});
         return {
             success:true,
             data:resp.data,

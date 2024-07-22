@@ -20,13 +20,18 @@ export default function Home(){
 
     const initiateCallPushNotification = async(peerId) => {
         setLoader(true)
-        const resp = await PushCallNotification(peerId);
+        console.log("peerId", peerId)
+        const resp = await PushCallNotification(user.id, peerId);
         if (resp.success){
             if (resp.status == 200){
                 console.log("Call Accepted by peer, initiating Socket Handshake")
             }else{
+                console.log("Connection Error")
                 Alert.alert("Connection Error")
             }
+        }else{
+            console.log("Push notification failed")
+            Alert.alert(resp.error)
         }
         setLoader(false)
     }
@@ -47,11 +52,11 @@ export default function Home(){
 
     const renderContactItem = ({item}) => {
         return (
-            <Link key={item.name} href={`/call?peerName=${item.name}`} asChild>
+            // <Link key={item.name} href={`/call?peerName=${item.name}`} asChild>
                 <TouchableOpacity style = {styles.contactItem} onPress={()=>{initiateCallPushNotification(item.id)}}>
                     <Text>{item.name} - {item.email} - {item.incantation}</Text>
                 </TouchableOpacity>
-            </Link>
+            // </Link>
         )
     }
 
