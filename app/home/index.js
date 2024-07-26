@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { GetContactListById } from "../../api/getContactList";
 import { PushCallNotification } from "../../api/pushCallNotification";
-import { Link, useLocalSearchParams } from "expo-router";
+import * as Notifications from "expo-notifications";
+import { Link, router, useLocalSearchParams } from "expo-router";
 
 // import { Stack} from "expo-router";
 
@@ -12,19 +13,24 @@ import { Link, useLocalSearchParams } from "expo-router";
 //   );
 // }
 
+const generateRandomUniqueRoomId = () => {
+    return "123"
+}
 
 export default function Home(){
     const user = useLocalSearchParams();
+    // const lastNotificationResponse = Notifications.useLastNotificationResponse()
     const [contactList,setContactList] = useState([])
     const [loader, setLoader] = useState(false)
 
-    const initiateCallPushNotification = async(peerId) => {
+    const initiateCallPushNotification = async(peerId, peerName) => {
         setLoader(true)
-        console.log("peerId", peerId)
-        const resp = await PushCallNotification(user.id, peerId);
+        const roomId = generateRandomUniqueRoomId();
+        const resp = await PushCallNotification(user.id, peerId, roomId);
         if (resp.success){
             if (resp.status == 200){
                 console.log("Call Accepted by peer, initiating Socket Handshake")
+                router.push({pathname:"call", params:{peerName:peerName, screenType:"outgoing", roomId:roomId}})
             }else{
                 console.log("Connection Error")
                 Alert.alert("Connection Error")
@@ -35,6 +41,24 @@ export default function Home(){
         }
         setLoader(false)
     }
+
+    // calls up when a notification comes up from killed state/background state
+    // useEffect(()=>{
+    //     console.log("last notification response", lastNotificationResponse)
+    // },[lastNotificationResponse])
+
+    useEffect(()=>{
+        // what to do if app is in foreground and a notification comes up
+        const subscriptionForeground = Notifications.addNotificationReceivedListener(
+          notification => {
+            console.log("foreground", notification)
+            console.log(notification.request.content.data)
+        }
+        )
+        return ()=>{
+          subscriptionForeground.remove();
+        }
+      },[])
 
     useEffect(()=>{
         const populateContacts = async  () => {
@@ -52,11 +76,10 @@ export default function Home(){
 
     const renderContactItem = ({item}) => {
         return (
-            // <Link key={item.name} href={`/call?peerName=${item.name}`} asChild>
-                <TouchableOpacity style = {styles.contactItem} onPress={()=>{initiateCallPushNotification(item.id)}}>
+            // <Link key={item.name} href={`/call?peerName=${item.name}?screenType=outgoing`} asChild>
+                <TouchableOpacity style = {styles.contactItem} onPress={()=>{initiateCallPushNotification(item.id, item.name)}}>
                     <Text>{item.name} - {item.email} - {item.incantation}</Text>
                 </TouchableOpacity>
-            // </Link>
         )
     }
 

@@ -54,6 +54,7 @@ export default function Login(){
             Alert.alert("Notifications Permissions not granted", "You might miss important calls if the app is in background")
           }else{
             const token = await getPushNotificationsTokenAsync()
+            console.log("token ", token)
             setPushToken(token)
           }
         }
