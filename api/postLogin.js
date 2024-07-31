@@ -2,6 +2,7 @@ import axios from "axios";
 
 const PostLogin = async(userObj) => {
     try{
+        console.log("lgon piost", userObj)
         const resp = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/login`, userObj);
         console.log("resp",resp)
         return {

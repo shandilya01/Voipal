@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Slot, router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
-import { SafeAreaView, Text, View } from 'react-native';
+import { Platform, SafeAreaView, Text, View } from 'react-native';
 
 export default function Layout() {
 
@@ -25,6 +25,19 @@ export default function Layout() {
             }
         }
         )
+
+        // channel tells the identity of the notification provider app
+    
+        if (Platform.OS === 'android') {
+          Notifications.setNotificationChannelAsync('voipalCall', {
+            name: 'voipalCall',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+            sound:"call_sound.wav"
+          });
+        }
+
         return ()=>{
         subscriptionForeground.remove();
         }

@@ -16,11 +16,12 @@
       "supportsTablet": true
     },
     "android": {
-      "useNextNotificationsApi": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.alphacentauri.voipal",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -30,13 +31,16 @@
     "plugins": [
       "expo-router",
       "expo-font",
-      ["expo-notifications",
-      {
-        "color": "#ffffff",
-        "sounds": [
-          "./assets/sounds/callSound.wav"
-        ]
-      }]
+      [
+        "expo-notifications",
+        {
+          "color": "#ffffff",
+          "sounds": [
+            "./assets/sounds/call_sound.wav"
+          ]
+        }
+      ],
+      "@config-plugins/react-native-webrtc"
     ],
     "experiments": {
       "typedRoutes": true

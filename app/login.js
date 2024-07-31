@@ -18,17 +18,6 @@ Notifications.setNotificationHandler({
 const getPushNotificationsTokenAsync = async() => {
     // the function expects the permission is granted for notifications
     console.log("getting token")
-    // channel tells the identity of the notification provider app
-    if (Platform.OS === 'android') {
-      const channelSetResponse = await Notifications.setNotificationChannelAsync('voipalCall', {
-        name: 'voipalCall',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-        sound:"callSound.wav"
-      });
-      console.log("channelSetResponse", channelSetResponse)
-    }
   
     try{
       const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
@@ -66,8 +55,12 @@ export default function Login(){
         switch (fieldName){
             case "email":
                 setEmail(e)
+                break;
             case "password":
                 setPassword(e)
+                break;
+            default:
+              break;
         }
     }
 

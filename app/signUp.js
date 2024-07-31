@@ -23,19 +23,26 @@ const SignUp = () => {
 
     const [emailError , setEmailError] = useState("");
     const [passWordError, setPasswordError] = useState("");
+    const [mobileError, setMobileError] = useState("")
+    const [apiError, setApiError] = useState("");
 
     const handleFieldChanges = (fieldName, e) => {
         switch (fieldName){
             case "email":
                 setEmail(e)
+                break;
             case "password":
                 setPassword(e)
+                break;
             case "confirmPassword":
                 setConfirmPassword(e);
+                break;
             case "name":
                 setName(e)
+                break;
             case "mobile":
                 setMobile(e);
+                break;
         }
     }
 
@@ -53,28 +60,57 @@ const SignUp = () => {
         if (resp.success && resp.status==200){
             router.replace("login")
         }else{
-            Alert.alert("Couldnt sign you up!")
+            setApiError(resp.error)
         }
     }
 
     const validateEmail = () => {
-
+        const regEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+        if (!regEmail.test(email)){
+            setEmailError("Invalid Email")
+            return false
+        }
+        setEmailError("")
+        return true;
     }
 
     const validatePassword = () => {
-
+        if(password.length === 0){
+            setPasswordError("Password is required");
+            return false
+        }        
+        else if(password.length < 6){
+            setPasswordError("Password should be minimum 6 characters");
+            return false
+        }      
+        else if(password.indexOf(' ') >= 0){        
+            setPasswordError("Password cannot contain spaces");                    
+            return false      
+        }
+        else if (password!==confirmPassword){
+            setPasswordError("Passwords do not match");
+            return false
+        }
+        console.log(password, confirmPassword)
+        setPasswordError("")
+        return true
     }
     
-    const validatePasswordMatch = () => {
-
-    }
 
     const validateMobile = () => {
-
+        if (mobile.length!=10 && mobile.length!=0){
+            setMobileError("Please enter valid mobile number")
+            return false
+        }
+        setMobileError("")
+        return true
     }
 
     const validateAllBeforeSubmit = () => {
-        return true;
+      validateEmail()
+      validateMobile()
+      validatePassword()
+      return false
     }
 
     return (
@@ -83,17 +119,32 @@ const SignUp = () => {
             <View style = {styles.loginField}>
                 <TextInput onChangeText={(e)=>handleFieldChanges("email",e)} placeholder='Email(UserID)'></TextInput>
             </View>
+            <View>
+                <Text style={styles.redError}>{emailError!==""?emailError:""}</Text>
+            </View>
+
             <View style = {styles.loginField}>
                 <TextInput onChangeText={(e)=>handleFieldChanges("name",e) } placeholder='Full Name'></TextInput>
             </View>
             <View style = {styles.loginField}>
                 <TextInput onChangeText={(e)=>handleFieldChanges("password",e)} placeholder='Password'></TextInput>
             </View>
+            <View>
+                <Text style={styles.redError}>{passWordError!==""?passWordError:""}</Text>
+            </View>
+
             <View style = {styles.loginField}>
                 <TextInput onChangeText={(e)=>handleFieldChanges("confirmPassword",e)} placeholder='Confirm Password'></TextInput>
             </View>
             <View style = {styles.loginField}>
                 <TextInput onChangeText={(e)=>handleFieldChanges("mobile",e)} placeholder='Mobile'></TextInput>
+            </View>
+            <View>
+                <Text style={styles.redError}>{mobileError!==""?mobileError:""}</Text>
+            </View>
+            
+            <View>
+                <Text style={styles.redError}>{apiError!==""?apiError:""}</Text>
             </View>
 
             <TouchableOpacity style={styles.loginButton} onPress = {()=> handleSignUp()}>
@@ -131,6 +182,9 @@ const styles = StyleSheet.create({
         marginTop: 30,
         backgroundColor: "purple",
       },
+    redError:{
+        color:"pink"
+    }
 })
 
 export default SignUp;

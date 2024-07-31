@@ -10,7 +10,8 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-
+google-services.json
+voipal-firebase-adminsdk-iu7y5-a2de834e87.json
 # macOS
 .DS_Store
 
