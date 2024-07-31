@@ -4,6 +4,8 @@ import { GetContactListById } from "../../api/getContactList";
 import { PushCallNotification } from "../../api/pushCallNotification";
 import * as Notifications from "expo-notifications";
 import { Link, router, useLocalSearchParams } from "expo-router";
+// import * as Crypto from 'expo-crypto';
+// import { LinearGradient } from "expo-linear-gradient";
 
 // import { Stack} from "expo-router";
 
@@ -15,11 +17,11 @@ import { Link, router, useLocalSearchParams } from "expo-router";
 
 const generateRandomUniqueRoomId = () => {
     return "123"
+    // return Crypto.randomUUID();
 }
 
 export default function Home(){
     const user = useLocalSearchParams();
-    // const lastNotificationResponse = Notifications.useLastNotificationResponse()
     const [contactList,setContactList] = useState([])
     const [loader, setLoader] = useState(false)
 
@@ -28,12 +30,12 @@ export default function Home(){
         const roomId = generateRandomUniqueRoomId();
         const resp = await PushCallNotification(user.id, peerId, roomId);
         if (resp.success){
-            if (resp.status == 200){
-                console.log("Call Accepted by peer, initiating Socket Handshake")
+            if (resp.status === 200){
+                console.log("Call Request Sent")
                 router.push({pathname:"call", params:{peerName:peerName, screenType:"outgoing", roomId:roomId}})
             }else{
-                console.log("Connection Error")
-                Alert.alert("Connection Error")
+                console.log("Peer not available")
+                Alert.alert("Peer not available")
             }
         }else{
             console.log("Push notification failed")
@@ -46,19 +48,6 @@ export default function Home(){
     // useEffect(()=>{
     //     console.log("last notification response", lastNotificationResponse)
     // },[lastNotificationResponse])
-
-    useEffect(()=>{
-        // what to do if app is in foreground and a notification comes up
-        const subscriptionForeground = Notifications.addNotificationReceivedListener(
-          notification => {
-            console.log("foreground", notification)
-            console.log(notification.request.content.data)
-        }
-        )
-        return ()=>{
-          subscriptionForeground.remove();
-        }
-      },[])
 
     useEffect(()=>{
         const populateContacts = async  () => {
@@ -77,9 +66,22 @@ export default function Home(){
     const renderContactItem = ({item}) => {
         return (
             // <Link key={item.name} href={`/call?peerName=${item.name}?screenType=outgoing`} asChild>
-                <TouchableOpacity style = {styles.contactItem} onPress={()=>{initiateCallPushNotification(item.id, item.name)}}>
-                    <Text>{item.name} - {item.email} - {item.incantation}</Text>
-                </TouchableOpacity>
+            <TouchableOpacity onPress={() => { initiateCallPushNotification(item.id, item.name) }} style={styles.cardContainer}>
+                <View
+                    
+                    style={styles.contactItem}
+                >
+                    <Text style = {styles.contactFirstAlphabet}>
+                        {item.name[0]}
+                    </Text>
+
+                    <View style = {styles.contactInfo}>
+                    <Text style={styles.contactTextName}>{item.name}</Text>
+                    <Text style={styles.contactText}>{item.email}</Text>
+                    <Text style={styles.contactText}>{item.incantation}</Text>
+                    </View>
+                </View>
+        </TouchableOpacity>
         )
     }
 
@@ -95,9 +97,55 @@ export default function Home(){
 }
 
 const styles = StyleSheet.create({
-    contactItem:{
-        padding:15,
-        borderRadius:5,
-        backgroundColor:"cyan",
+    container: {
+        flex: 1,
+        backgroundColor: "white",
+    },
+    listContainer: {
+        padding: 20,
+    },
+    cardContainer: {
+        borderRadius: 15,
+        overflow: "hidden",
+        marginVertical: 10,
+        elevation: 3, // for shadow on Android
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        padding:10
+    },
+    contactItem: {
+        flex:1,
+        flexDirection:"row",
+        padding: 10,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 15,
+        backgroundColor:"#F59D82",
+        alignItems:"flex-start",
+    },
+    contactText: {
+        fontSize: 15,
+        color: "white",
+        textAlign: "center",
+    },
+    contactTextName: {
+        fontSize: 18,
+        color: "white",
+        textAlign: "center",
+        textTransform:"capitalize"
+    },
+    contactFirstAlphabet:{
+        borderRadius:60,
+        backgroundColor:"yellow",
+        flex:1,
+        padding:8,
+        textTransform:"capitalize",
+        fontSize:40,
+        textAlign:"center"
+    },
+    contactInfo:{
+        flex:3,
     }
-})
+});

@@ -22,7 +22,7 @@ const SignUp = () => {
     const [mobile, setMobile] = useState(""); // optional Field
 
     const [emailError , setEmailError] = useState("");
-    const [passWordError, setPasswordError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
     const [mobileError, setMobileError] = useState("")
     const [apiError, setApiError] = useState("");
 
@@ -107,84 +107,139 @@ const SignUp = () => {
     }
 
     const validateAllBeforeSubmit = () => {
-      validateEmail()
-      validateMobile()
-      validatePassword()
-      return false
+      var validated = validateEmail()
+      validated&=validateMobile()
+      validated&=validatePassword()
+      return validated
     }
 
     return (
-        <View style = {styles.loginContainer} >
-            <StatusBar hidden={true} barStyle = "light-content"/>
-            <View style = {styles.loginField}>
-                <TextInput onChangeText={(e)=>handleFieldChanges("email",e)} placeholder='Email(UserID)'></TextInput>
-            </View>
-            <View>
-                <Text style={styles.redError}>{emailError!==""?emailError:""}</Text>
-            </View>
-
-            <View style = {styles.loginField}>
-                <TextInput onChangeText={(e)=>handleFieldChanges("name",e) } placeholder='Full Name'></TextInput>
-            </View>
-            <View style = {styles.loginField}>
-                <TextInput onChangeText={(e)=>handleFieldChanges("password",e)} placeholder='Password'></TextInput>
-            </View>
-            <View>
-                <Text style={styles.redError}>{passWordError!==""?passWordError:""}</Text>
+        <View style={styles.signUpContainer}>
+            <StatusBar hidden={true} barStyle="dark-content" />
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder='Email (UserID)'
+                    onChangeText={(e) => handleFieldChanges("email", e)}
+                    placeholderTextColor="#888"
+                />
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
             </View>
 
-            <View style = {styles.loginField}>
-                <TextInput onChangeText={(e)=>handleFieldChanges("confirmPassword",e)} placeholder='Confirm Password'></TextInput>
-            </View>
-            <View style = {styles.loginField}>
-                <TextInput onChangeText={(e)=>handleFieldChanges("mobile",e)} placeholder='Mobile'></TextInput>
-            </View>
-            <View>
-                <Text style={styles.redError}>{mobileError!==""?mobileError:""}</Text>
-            </View>
-            
-            <View>
-                <Text style={styles.redError}>{apiError!==""?apiError:""}</Text>
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder='Full Name'
+                    onChangeText={(e) => handleFieldChanges("name", e)}
+                    placeholderTextColor="#888"
+                />
             </View>
 
-            <TouchableOpacity style={styles.loginButton} onPress = {()=> handleSignUp()}>
-                <Text style = {{color:'white'}}>SIGN UP</Text>
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder='Password'
+                    secureTextEntry
+                    onChangeText={(e) => handleFieldChanges("password", e)}
+                    placeholderTextColor="#888"
+                />
+                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+            </View>
+
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder='Confirm Password'
+                    secureTextEntry
+                    onChangeText={(e) => handleFieldChanges("confirmPassword", e)}
+                    placeholderTextColor="#888"
+                />
+            </View>
+
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder='Mobile'
+                    keyboardType='numeric'
+                    onChangeText={(e) => handleFieldChanges("mobile", e)}
+                    placeholderTextColor="#888"
+                />
+                {mobileError ? <Text style={styles.errorText}>{mobileError}</Text> : null}
+            </View>
+
+            {apiError ? <Text style={styles.errorText}>{apiError}</Text> : null}
+
+            <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+                <Text style={styles.buttonText}>SIGN UP</Text>
             </TouchableOpacity>
 
             <Link href='login' asChild replace>
-                <TouchableOpacity style={styles.loginButton}>
-                    <Text style = {{color:'white'}}>Already Registered?</Text>
+                <TouchableOpacity style={styles.loginRedirectButton}>
+                    <Text style={styles.redirectText}>Already Registered? Login</Text>
                 </TouchableOpacity>
             </Link>
-
         </View>
-    )
+    );
 };
 
 const styles = StyleSheet.create({
-    loginContainer:{
-        flex:1,
-        backgroundColor: "grey",
-        alignItems:"center",
+    signUpContainer: {
+        flex: 1,
+        backgroundColor: "white",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
     },
-    loginField:{
-        flex:1,
-        backgroundColor:"grey",
-        flexDirection:"row",
+    inputContainer: {
+        width: "100%",
+        marginBottom: 15,
     },
-    loginButton: {
-        width: "80%",
+    input: {
+        width: "100%",
+        height: 50,
+        borderColor: "#ddd",
+        borderWidth: 1,
         borderRadius: 25,
-        minWidth : 250,
+        paddingHorizontal: 15,
+        fontSize: 16,
+        backgroundColor: "#f9f9f9",
+        color: "#333",
+    },
+    errorText: {
+        color: "#F59D82",
+        fontSize: 14,
+        marginTop: 5,
+        textAlign: "left",
+        alignSelf: "stretch",
+        paddingHorizontal: 15,
+    },
+    signUpButton: {
+        width: "100%",
+        borderRadius: 25,
         height: 50,
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 30,
-        backgroundColor: "purple",
-      },
-    redError:{
-        color:"pink"
-    }
-})
+        backgroundColor: "#F59D82",
+        marginVertical: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 3,
+    },
+    buttonText: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "600",
+    },
+    loginRedirectButton: {
+        marginTop: 15,
+    },
+    redirectText: {
+        color: "#F59D82",
+        fontSize: 16,
+        fontWeight: "600",
+    },
+});
 
 export default SignUp;

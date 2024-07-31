@@ -86,47 +86,92 @@ export default function Login(){
     }
 
     return (
-        <View style = {styles.loginContainer} >
-            <StatusBar hidden={true} barStyle = "light-content"/>
-            <View style = {styles.loginField}>
-                <TextInput onChangeText={(e)=>handleFieldChanges("email",e)} placeholder="Email"></TextInput>
-            </View>
-            <View style = {styles.loginField}>
-                <TextInput onChangeText={(e)=>handleFieldChanges("password",e)} placeholder="Password"></TextInput>
-            </View>
-            <Text style={{color:"pink"}}>{errorMessage!=""?errorMessage:""}</Text>
-            <TouchableOpacity style={styles.loginButton} onPress = {()=> handleLogin()}>
-                <Text style = {{color:'white'}}>LOGIN</Text>
-            </TouchableOpacity>
+      <View style={styles.loginContainer}>
+          <StatusBar hidden={true} barStyle="light-content" />
+          <View style={styles.loginField}>
+              <TextInput
+                  onChangeText={(e) => handleFieldChanges("email", e)}
+                  placeholder="Email"
+                  style={styles.input}
+                  placeholderTextColor="#888"
+              />
+          </View>
+          <View style={styles.loginField}>
+              <TextInput
+                  onChangeText={(e) => handleFieldChanges("password", e)}
+                  placeholder="Password"
+                  secureTextEntry
+                  style={styles.input}
+                  placeholderTextColor="#888"
+              />
+          </View>
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.buttonText}>LOGIN</Text>
+          </TouchableOpacity>
 
-            <Link href='signUp' asChild replace>
-                <TouchableOpacity style={styles.loginButton}>
-                    <Text style = {{color:'white'}}>New User?</Text>
-                </TouchableOpacity>
-            </Link>
-        </View>
-    )
+          <Link href="signUp" asChild replace>
+              <TouchableOpacity style={styles.signupButton}>
+                  <Text style={styles.signupText}>New User? Sign Up</Text>
+              </TouchableOpacity>
+          </Link>
+      </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    loginContainer:{
-        flex:1,
-        backgroundColor: "grey",
-        alignItems:"center",
-    },
-    loginField:{
-        flex:1,
-        backgroundColor:"grey",
-        flexDirection:"row",
-    },
-    loginButton: {
-        width: "80%",
-        borderRadius: 25,
-        minWidth : 250,
-        height: 50,
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 30,
-        backgroundColor: "purple",
-      },
-})
+  loginContainer: {
+      flex: 1,
+      backgroundColor: "white",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 20,
+  },
+  loginField: {
+      width: "100%",
+      marginBottom: 20,
+  },
+  input: {
+      width: "100%",
+      height: 50,
+      borderColor: "#ddd",
+      borderWidth: 1,
+      borderRadius: 25,
+      paddingHorizontal: 15,
+      fontSize: 16,
+      color: "#333",
+      backgroundColor: "#f9f9f9",
+  },
+  errorText: {
+      color: "#F59D82",
+      fontSize: 14,
+      marginBottom: 10,
+  },
+  loginButton: {
+      width: "100%",
+      borderRadius: 25,
+      height: 50,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#F59D82",
+      marginVertical: 10,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 5,
+      elevation: 3,
+  },
+  buttonText: {
+      color: "white",
+      fontSize: 18,
+      fontWeight: "600",
+  },
+  signupButton: {
+      marginTop: 15,
+  },
+  signupText: {
+      color: "#F59D82",
+      fontSize: 16,
+      fontWeight: "600",
+  },
+});

@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import { Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Button } from "react-native";
 import { mediaDevices, RTCIceCandidate, RTCPeerConnection, RTCView } from "react-native-webrtc";
 
@@ -12,7 +12,6 @@ const iceServers = {
   };
 
 export default function Call(){
-    console.log("Call rerendered")
     const props = useLocalSearchParams();
     const [currScreenType,setCurrScreenType] = useState(props.screenType)
     const ws = useRef(null)
@@ -146,44 +145,91 @@ export default function Call(){
 
     let currScreen;
 
-    switch (currScreenType){
+    switch (currScreenType) {
         case "outgoing":
-            
-            currScreen = <View>
-                    <Text>Calling : {props.peerName} ... to join in room {props.roomId}</Text>
+            currScreen = (
+                <View style={styles.callStatus}>
+                    <Text style={styles.callText}>Calling {props.peerName}... to join in room {props.roomId}</Text>
                 </View>
-                
+            );
             break;
-
-        // Id          int    `json:"id"`
-        // Name        string `json:"name"`
-        // Email       string `json:"email"`
-        // PhoneNumber string `json:"phoneNumber"`
-        // Incantation string `json:"incantation"`
-        // RoomId      string `json:"roomId"`
         case "incoming":
-            currScreen = <View>
-                <Button onPress={()=>{fireJoinEvent(props.roomId)}} title ='Accept incoming Call'>Press to Accept Incoming Call from User : {props.name}</Button>
-                <Text>from {props.name} in room : {props.roomId}</Text>
-            </View>
+            currScreen = (
+                <View style={styles.callStatus}>
+                    <Button
+                        onPress={() => { fireJoinEvent(props.roomId); }}
+                        title="Accept incoming call"
+                    />
+                    <Text style={styles.callText}>Incoming call from {props.name} in room: {props.roomId}</Text>
+                </View>
+            );
             break;
         case "ongoing":
-            currScreen = <View>
-            <Text>Room ID: {props.roomId}</Text>
-          </View>
+            currScreen = (
+                <View style={styles.callStatus}>
+                    <Text style={styles.callText}>Room ID: {props.roomId}</Text>
+                </View>
+            );
             break;
-        default :
-            currScreen = <View><Text>Screen Type not given</Text></View>
+        default:
+            currScreen = (
+                <View style={styles.callStatus}>
+                    <Text style={styles.callText}>Screen type not given</Text>
+                </View>
+            );
     }
-    
-    return <SafeAreaView>
-        <View style = {{alignItems:"center", alignContent:"space-evenly"}}> 
-        {localStream && (
-              <RTCView streamURL={localStream.toURL()} style={{ width: 200, height: 200 }} />
-            )}
-        {remoteStream && (
-              <RTCView streamURL={remoteStream.toURL()} style={{ width: 500, height: 500 }} />
-            )}
-        </View>
-        {currScreen}</SafeAreaView>
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.videoContainer}>
+                {localStream && (
+                    <RTCView streamURL={localStream.toURL()} style={styles.localVideo} />
+                )}
+                {remoteStream && (
+                    <RTCView streamURL={remoteStream.toURL()} style={styles.remoteVideo} />
+                )}
+            </View>
+            {currScreen}
+        </SafeAreaView>
+    );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#F0F0F0",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+    },
+    videoContainer: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    localVideo: {
+        width: 200,
+        height: 200,
+        borderRadius: 10,
+        backgroundColor: "#000",
+    },
+    remoteVideo: {
+        width: 500,
+        height: 500,
+        borderRadius: 10,
+        backgroundColor: "#000",
+    },
+    callStatus: {
+        alignItems: "center",
+        marginVertical: 20,
+    },
+    callText: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#333",
+        textAlign: "center",
+        paddingHorizontal: 10,
+    },
+});

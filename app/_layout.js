@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Slot, router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { Platform, SafeAreaView, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 export default function Layout() {
 
@@ -44,9 +45,9 @@ export default function Layout() {
     },[])
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1  , marginVertical:20}}>
+      <StatusBar style = {{ color :"black"}}/>
       <View style={{ flex: 1, justifyContent: 'flex-start', padding: 16 }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Voipal</Text>
         <Slot/>
       </View>
     </SafeAreaView>
