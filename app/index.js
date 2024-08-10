@@ -1,57 +1,223 @@
-import { Link } from "expo-router";
-import {  StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useState, useEffect, useImperativeHandle } from "react";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
+import { PostLogin } from "../api/postLogin";
+import { Link, router } from "expo-router";
+import * as SecureStorage from 'expo-secure-store';
 
-export default function Index() { 
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    };
+  },
+});
 
+const getPushNotificationsTokenAsync = async () => {
+  try {
+    const projectId =
+      Constants?.expoConfig?.extra?.eas?.projectId ??
+      Constants?.easConfig?.projectId;
+    const token = (await Notifications.getExpoPushTokenAsync({ projectId }))
+      .data;
+    return token;
+  } catch (err) {
+    console.log("Error", err);
+    return null;
+  }
+};
+
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [pushToken, setPushToken] = useState(""); // to be changed later
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(()=>{
+    const checkAuthorizedUserAndNavigate = async() => {
+      setIsLoading(true)
+      const email = await SecureStorage.getItemAsync("email");
+      const password = await SecureStorage.getItemAsync("password");
+      const userObj = {
+        email:email,
+        password:password,
+      }
+      
+      const resp = await PostLogin(userObj);
+      console.log("handle login response", resp);
+      if (resp.success) {
+        if (resp.status == 200) {
+          updateSecureStorage(userObj)
+          router.replace({ pathname: "(tabs)/", params: resp.data });
+        } else {
+          setErrorMessage("Please Re-login!");
+        }
+      } else {
+        setErrorMessage(resp.error);
+      }
+      setIsLoading(false)
+    }
+
+    checkAuthorizedUserAndNavigate()
+    askPermissionAndGenToken()
+  },[])
+
+  const askPermissionAndGenToken = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Notifications Permissions not granted",
+        "You might miss important calls if the app is in background"
+      );
+    } else {
+      const token = await getPushNotificationsTokenAsync();
+      console.log("token ", token);
+      setPushToken(token);
+    }
+  };
+
+
+  const updateSecureStorage = (resp) => {
+    if (resp.email && resp.password){
+      SecureStorage.setItemAsync("email", resp.email)
+      SecureStorage.setItemAsync("password", resp.password)
+    }
+  }
+
+  const handleFieldChanges = (fieldName, e) => {
+    switch (fieldName) {
+      case "email":
+        setEmail(e);
+        break;
+      case "password":
+        setPassword(e);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleLogin = async () => {
+    const userObj = {
+      email: email,
+      password: password,
+      pushToken: pushToken,
+    };
+
+    const resp = await PostLogin(userObj);
+    console.log("handle login response", resp);
+    if (resp.success) {
+      if (resp.status == 200) {
+        router.replace({ pathname: "(tabs)/", params: resp.data });
+        updateSecureStorage(userObj)
+      } else {
+        setErrorMessage("Credentials Not Found!");
+      }
+    } else {
+      setErrorMessage(resp.error);
+    }
+  };
+
+  if (isLoading){
+    return <ActivityIndicator/>
+  }
   return (
+    <View style={styles.loginContainer}>
+      <View style={styles.loginField}>
+        <TextInput
+          onChangeText={(e) => handleFieldChanges("email", e)}
+          placeholder="Email"
+          style={styles.input}
+          placeholderTextColor="#888"
+        />
+      </View>
+      <View style={styles.loginField}>
+        <TextInput
+          onChangeText={(e) => handleFieldChanges("password", e)}
+          placeholder="Password"
+          secureTextEntry
+          style={styles.input}
+          placeholderTextColor="#888"
+        />
+      </View>
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.buttonText}>LOGIN</Text>
+      </TouchableOpacity>
 
-<View style={styles.container}>
-  <Text style={styles.title}>Welcome to Voipal</Text>
-  <Text style={styles.subtitle}>Connect with your friends easily!</Text>
-  <Link href='signUp' asChild>
-  <TouchableOpacity style={styles.button}>
-      <Text style={styles.buttonText}>Get Started</Text>
-  </TouchableOpacity>
-  </Link>
-</View>
+      <Link href="signUp" asChild replace>
+        <TouchableOpacity style={styles.signupButton}>
+          <Text style={styles.signupText}>New User? Sign Up</Text>
+        </TouchableOpacity>
+      </Link>
+    </View>
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "white",
-      padding: 20,
+  loginContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
-  title: {
-      fontSize: 32,
-      fontWeight: "bold",
-      color: "#F59D82",
-      marginBottom: 10,
+  loginField: {
+    width: "100%",
+    marginBottom: 20,
   },
-  subtitle: {
-      fontSize: 18,
-      color: "#333",
-      textAlign: "center",
-      marginBottom: 30,
+  input: {
+    width: "100%",
+    height: 50,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    color: "#333",
+    backgroundColor: "#f9f9f9",
   },
-  button: {
-      backgroundColor: "#F59D82",
-      paddingVertical: 15,
-      paddingHorizontal: 30,
-      borderRadius: 30,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
-      elevation: 5, // for shadow on Android
+  errorText: {
+    color: "#F44336", // Bright red color for error messages
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  loginButton: {
+    width: "100%",
+    borderRadius: 25,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#6200EE", // Deep purple color for buttons
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3,
   },
   buttonText: {
-      color: "white",
-      fontSize: 18,
-      fontWeight: "600",
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  signupButton: {
+    marginTop: 15,
+  },
+  signupText: {
+    color: "#6200EE",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

@@ -30,7 +30,14 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Vidaloka-Regular.ttf"
+          ]
+        }
+      ],
       [
         "expo-notifications",
         {
@@ -40,7 +47,8 @@
           ]
         }
       ],
-      "@config-plugins/react-native-webrtc"
+      "@config-plugins/react-native-webrtc",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
