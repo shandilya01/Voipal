@@ -23,7 +23,7 @@ const PostLogin = async(userObj) => {
         //         id: "32311",
         //         name: "Shandilya",
         //         email: "tushar0shandilya@gmail.com",
-        //         incantation: "shandilya.shandilya.shandilya",
+        //         voipId: "shandilya.shandilya.shandilya",
         //         mobile: "",
         //     },
         //     status:200,

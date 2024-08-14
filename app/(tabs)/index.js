@@ -1,41 +1,34 @@
-import { useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Modal, Animated, Easing } from "react-native";
+import { useContext, useEffect, useState } from "react";
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator} from "react-native";
 import { GetContactListById } from "../../api/getContactList";
 import { PushCallNotification } from "../../api/pushCallNotification";
-import { router, useLocalSearchParams } from "expo-router";
-import * as Crypto from 'expo-crypto';
+import { router, useGlobalSearchParams, useLocalSearchParams } from "expo-router";
+
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import DialPad from "../dialPad";
+import { AppContext } from "../appContextProvider";
+import initiateCallPushNotification from "../../hooks/initCallPushNotification";
 
-const generateRandomUniqueRoomId = () => {
-    return Crypto.randomUUID();
-}
 
 export default function Index() {
-    const user = useLocalSearchParams();
+
+    const params = useContext(AppContext)
+    console.log("params", params)
+    const user = params.params.user
+    
     const [contactList, setContactList] = useState([]);
     const [loader, setLoader] = useState(false);
-    const [isDialPadVisible, setIsDialPadVisible] = useState(false);
-    const [animation] = useState(new Animated.Value(0));
 
-    const initiateCallPushNotification = async (peerId, peerName) => {
-        setLoader(true);
-        const roomId = generateRandomUniqueRoomId();
-        const resp = await PushCallNotification(user.id, peerId, roomId);
-        if (resp.success) {
-            if (resp.status === 200) {
-                console.log("Call Request Sent");
-                router.push({ pathname: "call", params: { peerName: peerName, screenType: "outgoing", roomId: roomId } });
-            } else {
-                console.log("Peer not available");
-                Alert.alert("Peer not available");
-            }
-        } else {
-            console.log("Push notification failed");
-            Alert.alert(resp.error);
+    const handleContactPress = async (peerId, peerName) => {
+        setLoader(true)
+        const notification = await initiateCallPushNotification(user.id, peerId)
+        setLoader(false)
+        if (notification.success){
+            router.push({ pathname: "call", params: { peerName: peerName, screenType: "outgoing", roomId: notification.roomId } });
+        }else{
+            Alert.alert(notification.message)
         }
-        setLoader(false);
     }
 
     useEffect(() => {
@@ -52,32 +45,8 @@ export default function Index() {
         populateContacts();
     }, []);
 
-    const openDialPad = () => {
-        setIsDialPadVisible(true);
-        Animated.timing(animation, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-            easing: Easing.out(Easing.ease),
-        }).start();
-    };
-
-    const closeDialPad = () => {
-        Animated.timing(animation, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-            easing: Easing.in(Easing.ease),
-        }).start(() => setIsDialPadVisible(false));
-    };
-
-    const slideUp = animation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [300, 0], // Adjust to control the sliding range
-    });
-
     const renderContactItem = ({ item }) => (
-        <TouchableOpacity onPress={() => initiateCallPushNotification(item.id, item.name)} style={styles.cardContainer}>
+        <TouchableOpacity onPress={() => handleContactPress(item.id, item.name)} style={styles.cardContainer}>
             <LinearGradient
                 colors={['#8EC5FC', '#E0C3FC']}
                 start={{ x: 0, y: 1 }}
@@ -88,7 +57,7 @@ export default function Index() {
                 <View style={styles.contactInfo}>
                     <Text style={styles.contactTextName}>{item.name}</Text>
                     <Text style={styles.contactText}>{item.email}</Text>
-                    <Text style={styles.contactText}>{item.incantation}</Text>
+                    <Text style={styles.contactText}>{item.voipId}</Text>
                 </View>
             </LinearGradient>
         </TouchableOpacity>
@@ -108,7 +77,7 @@ export default function Index() {
                 />
             )}
 
-            <View style={styles.dialButton} onPress={openDialPad}>
+            <View style={styles.dialButton} >
                 <DialPad></DialPad>
             </View>
 

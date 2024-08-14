@@ -1,61 +1,83 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import {refreshIncantationById} from '../../api/getContactList'
+import {refreshVoipIdById} from '../../api/getContactList'
 import { HttpStatusCode } from 'axios';
-export default function Settings() {
-    const [userId, setUserId] = useState("123456789012345678901234567890");
-    const [incantation,setIncantation] = useState("old.random.inc");
-    const [name, setName] = useState("John Doe");
-    const [email, setEmail] = useState("john.doe@example.com");
-    const [birthdate, setBirthdate] = useState("1990-01-01");
+import * as SecureStorage from 'expo-secure-store';
+import { router, useLocalSearchParams } from 'expo-router';
+import { AppContext } from '../appContextProvider';
 
-    const refreshIncantation = async() => {
-        const newIdResponse = await refreshIncantationById(userId)
+export default function Settings() {
+    const params = useContext(AppContext)
+    console.log("params", params)
+    const user = params.params.user
+
+    const [userId, setUserId] = useState(user.id);
+    const [voipId,setVoipId] = useState(user.voipId);
+    const [name, setName] = useState(user.name);
+    const [email, setEmail] = useState(user.email);
+
+    const refreshVoipId = async() => {
+        const newIdResponse = await refreshVoipIdById(userId)
         if (newIdResponse.success && newIdResponse.status===HttpStatusCode.Ok){
-            setIncantation(newIdResponse.data);
+            setVoipId(newIdResponse.data);
         }
     };
 
+    const handleLogout = () => {
+        SecureStorage.deleteItemAsync("email")
+        SecureStorage.deleteItemAsync("password")
+        router.replace("/")
+    }
+
     return (
         <View style={styles.container}>
-            <Text style={styles.screenHeader}>Settings</Text>
+            <View style = {styles.contentContainer}>
+                <Text style={styles.screenHeader}>Settings</Text>
 
-            <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Incantation</Text>
-                <View style={styles.row}>
-                    <ScrollView horizontal contentContainerStyle={styles.scrollContainer}>
-                        <TextInput
-                            style={[styles.input, styles.scrollableInput]}
-                            value={incantation}
-                            editable={false}
-                            multiline={false}
-                        />
-                    </ScrollView>
-                    <TouchableOpacity style={styles.refreshButton} onPress={refreshIncantation}>
-                        <Ionicons name="refresh-outline" size={24} color="#6200EE" />
-                    </TouchableOpacity>
+                <View style={styles.fieldContainer}>
+                    <Text style={styles.label}>VoipId</Text>
+                    <View style={styles.row}>
+                        <ScrollView horizontal contentContainerStyle={styles.scrollContainer}>
+                            <TextInput
+                                style={[styles.input, styles.scrollableInput]}
+                                value={voipId}
+                                editable={false}
+                                multiline={false}
+                            />
+                        </ScrollView>
+                        <TouchableOpacity style={styles.refreshButton} onPress={refreshVoipId}>
+                            <Ionicons name="refresh-outline" size={24} color="#6200EE" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                <View style={styles.fieldContainer}>
+                    <Text style={styles.label}>Name</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={name}
+                        placeholderTextColor="#888"
+                        editable={false}
+                    />
+                </View>
+
+                <View style={styles.fieldContainer}>
+                    <Text style={styles.label}>Email</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={email}
+                        keyboardType="email-address"
+                        editable={false}
+                    />
                 </View>
             </View>
 
-            <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Name</Text>
-                <TextInput
-                    style={styles.input}
-                    value={name}
-                    placeholderTextColor="#888"
-                    editable={false}
-                />
-            </View>
+            <View style={styles.logoutContainer}>
+                <TouchableOpacity style={styles.logoutButton} onPress = {handleLogout}>
+                    <Text>Logout</Text>
+                </TouchableOpacity>
 
-            <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                    style={styles.input}
-                    value={email}
-                    keyboardType="email-address"
-                    editable={false}
-                />
             </View>
 
         </View>
@@ -68,6 +90,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingTop: 20,
         backgroundColor: '#fff',
+    },
+    contentContainer:{
+        flex:10,
     },
     screenHeader: {
         fontSize: 24,
@@ -113,4 +138,15 @@ const styles = StyleSheet.create({
         backgroundColor: "#f9f9f9",
         borderRadius: 10,
     },
+    logoutContainer:{
+        flex:1,
+    },
+    logoutButton:{
+        backgroundColor:"pink",
+        height:40,
+        alignItems:'center',
+        justifyContent:'center',
+        borderRadius:10,
+    }
+
 });

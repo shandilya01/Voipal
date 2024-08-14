@@ -54,7 +54,7 @@ const SignUp = () => {
     };
     const resp = await PostSignUp(userObj);
     if (resp.success && resp.status == 200) {
-      router.replace('login');
+      router.replace('/');
     } else {
       setApiError(resp.error);
     }
@@ -163,7 +163,7 @@ const SignUp = () => {
         <Text style={styles.buttonText}>SIGN UP</Text>
       </TouchableOpacity>
 
-      <Link href="login" asChild replace>
+      <Link href="/" asChild replace>
         <TouchableOpacity style={styles.loginRedirectButton}>
           <Text style={styles.redirectText}>Already Registered? Login</Text>
         </TouchableOpacity>

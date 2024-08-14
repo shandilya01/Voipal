@@ -26,7 +26,7 @@ export default function Call() {
     console.log("starting local stream as pc is already initialized");
     startLocalStream();
 
-    ws.current = new WebSocket('ws://192.168.29.102:5001/ws');
+    ws.current = new WebSocket('ws://192.168.0.117:5001/ws');
     pc.current = new RTCPeerConnection(iceServers);
 
     ws.current.onopen = () => {

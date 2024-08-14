@@ -17,9 +17,9 @@ const GetContactListById = async(userId) => {
     }
 }
 
-const refreshIncantationById = async(userId) => {
+const refreshVoipIdById = async(userId) => {
     try{
-        const resp = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/refreshIncantation`,{params :{id: userId}})
+        const resp = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/refreshVoipId`,{params :{id: userId}})
         return {
             success:true,
             data:resp.data,
@@ -28,9 +28,41 @@ const refreshIncantationById = async(userId) => {
     }catch (err){
         return {
             success:false,
-            error:(err.message || "Could Not Update Incantation"),
+            error:(err.message || "Could Not Update VoipId"),
         }
     }
 }
 
-export {GetContactListById,refreshIncantationById};
+const getWordList = async() => {
+    try{
+        const resp = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/getWordList`)
+        return {
+            success:true,
+            data:resp.data,
+            status:resp.status,
+        }
+    }catch (err){
+        return {
+            success:false,
+            error:(err.message || "Could Not Get Word List"),
+        }
+    }
+}
+
+const getUserByVoipId = async (peerVoipId) => {
+    try{
+        const resp = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/getUserByVoipId`,{params :{voipId: peerVoipId}})
+        return {
+            success:true,
+            data:resp.data,
+            status:resp.status,
+        }
+    }catch (err){
+        return {
+            success:false,
+            error:(err.message || "Could Not Get Word List"),
+        }
+    }
+}
+
+export {GetContactListById,refreshVoipIdById,getWordList,getUserByVoipId};

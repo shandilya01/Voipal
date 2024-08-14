@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform, View, ImageBackground, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { AppContextProvider } from './appContextProvider';
 
 export default function Layout() {
     const lastNotificationResponse = Notifications.useLastNotificationResponse();
@@ -48,22 +49,24 @@ export default function Layout() {
     }, []);
 
     return (
-        <ImageBackground
-            source={require('../assets/images/background.jpg')} 
-            style={styles.backgroundImage}
-            resizeMode="cover"
-        >
-            <StatusBar style="auto" translucent backgroundColor="transparent" />
-            <SafeAreaView style={styles.overlay}>
-                {/* <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="login" />
-                    <Stack.Screen name="signUp" />
-                </Stack> */}
-                <Slot/>
-            </SafeAreaView>
-        </ImageBackground>
+        <AppContextProvider>
+            <ImageBackground
+                source={require('../assets/images/background.jpg')} 
+                style={styles.backgroundImage}
+                resizeMode="cover"
+            >
+                <StatusBar style="auto" translucent backgroundColor="transparent" />
+                <SafeAreaView style={styles.overlay}>
+                    {/* <Stack screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="index" />
+                        <Stack.Screen name="(tabs)" />
+                        <Stack.Screen name="login" />
+                        <Stack.Screen name="signUp" />
+                    </Stack> */}
+                    <Slot/>
+                </SafeAreaView>
+            </ImageBackground>
+        </AppContextProvider>
     );
 }
 

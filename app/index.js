@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useImperativeHandle } from "react";
+import React, { useState, useEffect, useImperativeHandle, useContext, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import Constants from "expo-constants";
 import { PostLogin } from "../api/postLogin";
 import { Link, router } from "expo-router";
 import * as SecureStorage from 'expo-secure-store';
+import { AppContext } from "./appContextProvider";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -39,17 +40,27 @@ const getPushNotificationsTokenAsync = async () => {
 };
 
 export default function Login() {
+
+  const { setParams } = useContext(AppContext);
+  console.log("setparams", setParams)
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [pushToken, setPushToken] = useState(""); // to be changed later
+  const pushToken= useRef(""); // to be changed later
   const [isLoading, setIsLoading] = useState(false)
+
+  
 
   useEffect(()=>{
     const checkAuthorizedUserAndNavigate = async() => {
       setIsLoading(true)
       const email = await SecureStorage.getItemAsync("email");
       const password = await SecureStorage.getItemAsync("password");
+      if (email === null || password === null){
+        setIsLoading(false)
+        return;
+      }
       const userObj = {
         email:email,
         password:password,
@@ -60,7 +71,8 @@ export default function Login() {
       if (resp.success) {
         if (resp.status == 200) {
           updateSecureStorage(userObj)
-          router.replace({ pathname: "(tabs)/", params: resp.data });
+          setParams({user:resp.data})
+          router.replace({ pathname: "(tabs)/" });
         } else {
           setErrorMessage("Please Re-login!");
         }
@@ -71,7 +83,7 @@ export default function Login() {
     }
 
     checkAuthorizedUserAndNavigate()
-    askPermissionAndGenToken()
+    
   },[])
 
   const askPermissionAndGenToken = async () => {
@@ -84,7 +96,7 @@ export default function Login() {
     } else {
       const token = await getPushNotificationsTokenAsync();
       console.log("token ", token);
-      setPushToken(token);
+      pushToken.current = token
     }
   };
 
@@ -110,18 +122,22 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
+    
+    await askPermissionAndGenToken()
+
     const userObj = {
       email: email,
       password: password,
-      pushToken: pushToken,
+      pushToken: pushToken.current,
     };
 
     const resp = await PostLogin(userObj);
     console.log("handle login response", resp);
     if (resp.success) {
       if (resp.status == 200) {
-        router.replace({ pathname: "(tabs)/", params: resp.data });
+        setParams({user:resp.data})
         updateSecureStorage(userObj)
+        router.replace({ pathname: "(tabs)/"});
       } else {
         setErrorMessage("Credentials Not Found!");
       }
