@@ -1,7 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Button } from "react-native";
 import { mediaDevices, RTCIceCandidate, RTCPeerConnection, RTCView } from "react-native-webrtc";
 
@@ -13,6 +14,7 @@ const iceServers = {
 };
 
 export default function Call() {
+  console.log("rerendered Call")
   const props = useLocalSearchParams();
   const currScreenType = useRef(props.screenType);
   const ws = useRef(null);
@@ -21,6 +23,9 @@ export default function Call() {
   const localStreamRef = useRef(null);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
+
+  const [micEnabled, setMicEnabled] = useState(true)
+  const [videoEnabled, setVideoEnabled] = useState(true)
 
   useEffect(() => {
     console.log("starting local stream as pc is already initialized");
@@ -40,6 +45,8 @@ export default function Call() {
 
     ws.current.onerror = (error) => {
       console.log('Connection error:', error);
+      Alert.alert(error);
+      router.replace('(tabs)/')
     };
 
     ws.current.onmessage = (event) => {
@@ -62,8 +69,24 @@ export default function Call() {
     };
   }, []);
 
+  useEffect(() => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getAudioTracks().forEach(track => {
+        track.enabled = micEnabled;
+      });
+    }
+  }, [micEnabled]);
+
+  useEffect(() => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getVideoTracks().forEach(track => {
+        track.enabled = videoEnabled;
+      });
+    }
+  }, [videoEnabled]);
+
   const startLocalStream = async () => {
-    const stream = await mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true });
+    const stream = await mediaDevices.getUserMedia({ video: true, audio: true });
     console.log("local stream", stream);
     stream.getTracks().forEach(track => pc.current.addTrack(track, stream));
     localStreamRef.current = stream
@@ -184,14 +207,28 @@ export default function Call() {
       style={styles.container}
     >
       <View style={styles.videoContainer}>
-        {localStream && (
-          <RTCView streamURL={localStream.toURL()} style={styles.localVideo} />
+        {localStreamRef.current && (
+          <RTCView streamURL={localStreamRef.current.toURL()} style={styles.localVideo} />
         )}
         {remoteStream && (
           <RTCView streamURL={remoteStream.toURL()} style={styles.remoteVideo} />
         )}
+        
       </View>
+      
       {currScreen}
+
+      <View style = {styles.buttonBar}>
+      <TouchableOpacity style = {styles.micButton} onPress={()=>setMicEnabled(!micEnabled)}>
+            <Ionicons name={micEnabled?"mic-outline":"mic-off-outline"} size={40} color="#6200EE" />
+        </TouchableOpacity>
+        <TouchableOpacity style = {styles.dialButton} onPress={()=>router.replace('(tabs)/')}>
+            <Ionicons name="call" size={40} color="#a84032" />
+        </TouchableOpacity>
+        <TouchableOpacity style = {styles.videoButton} onPress={()=>setVideoEnabled(!videoEnabled)}>
+            <Ionicons name={videoEnabled?"videocam-outline":"videocam-off-outline"} size={40} color="#6200EE" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -235,4 +272,24 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 10,
   },
+  dialButton: {
+    padding: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  videoButton:{
+    padding: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  buttonBar:{
+    padding: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 30, 
+    flexDirection:'row',
+    width:'100%',
+    justifyContent:'space-evenly',
+  }
 });

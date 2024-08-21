@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabLayout() {
     return (
@@ -19,6 +18,7 @@ export default function TabLayout() {
                         shadowOpacity: 0.1,
                         shadowRadius: 6,
                         elevation: 8, 
+                        borderRadius:15,
                     },
                     tabBarLabelStyle: {
                         fontSize: 12,

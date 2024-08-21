@@ -11,7 +11,7 @@ const GetContactListById = async(userId) => {
     }catch (err){
         return {
             success:false,
-            error:(err.message || "Could not fetch Contacts"),
+            error:(err.response?.data?.message || err.message || "Could not fetch Contacts"),
         }
         
     }
@@ -28,7 +28,7 @@ const refreshVoipIdById = async(userId) => {
     }catch (err){
         return {
             success:false,
-            error:(err.message || "Could Not Update VoipId"),
+            error:(err.response?.data?.message || err.message || "Could Not Update VoipId"),
         }
     }
 }
@@ -44,7 +44,7 @@ const getWordList = async() => {
     }catch (err){
         return {
             success:false,
-            error:(err.message || "Could Not Get Word List"),
+            error:(err.response?.data?.message || err.message || "Could Not Get Word List"),
         }
     }
 }
@@ -60,7 +60,7 @@ const getUserByVoipId = async (peerVoipId) => {
     }catch (err){
         return {
             success:false,
-            error:(err.message || "Could Not Get Word List"),
+            error:(err.response?.data?.message || err.message || "Could Not Get User By VoipId"),
         }
     }
 }

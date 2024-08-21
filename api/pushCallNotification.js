@@ -13,7 +13,7 @@ const PushCallNotification = async(userId, peerId, roomId) => {
         console.log("dsad",err)
         return {
             success:false,
-            error: err.message || "Oops! Something wrong from our side!",
+            error: err.response?.data?.message || err.message ||"Oops! Something wrong from our side!",
         }
     }
 }

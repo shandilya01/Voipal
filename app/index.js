@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useImperativeHandle, useContext, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -42,36 +42,34 @@ const getPushNotificationsTokenAsync = async () => {
 export default function Login() {
 
   const { setParams } = useContext(AppContext);
-  console.log("setparams", setParams)
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const pushToken= useRef(""); // to be changed later
-  const [isLoading, setIsLoading] = useState(false)
+  const pushToken = useRef(""); // to be changed later
+  const [isLoading, setIsLoading] = useState(false);
 
-  
-
-  useEffect(()=>{
-    const checkAuthorizedUserAndNavigate = async() => {
-      setIsLoading(true)
+  useEffect(() => {
+    const checkAuthorizedUserAndNavigate = async () => {
+      setIsLoading(true);
       const email = await SecureStorage.getItemAsync("email");
       const password = await SecureStorage.getItemAsync("password");
-      if (email === null || password === null){
-        setIsLoading(false)
+      if (email === null || password === null) {
+        setIsLoading(false);
         return;
       }
       const userObj = {
-        email:email,
-        password:password,
-      }
-      
+        email: email,
+        password: password,
+      };
+
       const resp = await PostLogin(userObj);
       console.log("handle login response", resp);
       if (resp.success) {
         if (resp.status == 200) {
-          updateSecureStorage(userObj)
-          setParams({user:resp.data})
+          updateSecureStorage(userObj);
+          setParams({ user: resp.data });
+          setIsLoading(false);
           router.replace({ pathname: "(tabs)/" });
         } else {
           setErrorMessage("Please Re-login!");
@@ -79,12 +77,11 @@ export default function Login() {
       } else {
         setErrorMessage(resp.error);
       }
-      setIsLoading(false)
-    }
+      setIsLoading(false);
+    };
 
-    checkAuthorizedUserAndNavigate()
-    
-  },[])
+    checkAuthorizedUserAndNavigate();
+  }, []);
 
   const askPermissionAndGenToken = async () => {
     const { status } = await Notifications.requestPermissionsAsync();
@@ -96,17 +93,16 @@ export default function Login() {
     } else {
       const token = await getPushNotificationsTokenAsync();
       console.log("token ", token);
-      pushToken.current = token
+      pushToken.current = token;
     }
   };
 
-
   const updateSecureStorage = (resp) => {
-    if (resp.email && resp.password){
-      SecureStorage.setItemAsync("email", resp.email)
-      SecureStorage.setItemAsync("password", resp.password)
+    if (resp.email && resp.password) {
+      SecureStorage.setItemAsync("email", resp.email);
+      SecureStorage.setItemAsync("password", resp.password);
     }
-  }
+  };
 
   const handleFieldChanges = (fieldName, e) => {
     switch (fieldName) {
@@ -122,8 +118,7 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
-    
-    await askPermissionAndGenToken()
+    await askPermissionAndGenToken();
 
     const userObj = {
       email: email,
@@ -135,9 +130,9 @@ export default function Login() {
     console.log("handle login response", resp);
     if (resp.success) {
       if (resp.status == 200) {
-        setParams({user:resp.data})
-        updateSecureStorage(userObj)
-        router.replace({ pathname: "(tabs)/"});
+        setParams({ user: resp.data });
+        updateSecureStorage(userObj);
+        router.replace({ pathname: "(tabs)/" });
       } else {
         setErrorMessage("Credentials Not Found!");
       }
@@ -146,11 +141,15 @@ export default function Login() {
     }
   };
 
-  if (isLoading){
-    return <ActivityIndicator/>
+  if (isLoading) {
+    return <ActivityIndicator />;
   }
+  
   return (
     <View style={styles.loginContainer}>
+      {/* Add the welcome message */}
+      <Text style={styles.welcomeText}>Welcome to Voipal!</Text>
+
       <View style={styles.loginField}>
         <TextInput
           onChangeText={(e) => handleFieldChanges("email", e)}
@@ -188,6 +187,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
+  },
+  welcomeText: {
+    fontSize: 30,
+    color: "#6200EE",
+    fontWeight: "bold",
+    marginBottom: 30, // Add some margin below the welcome text
   },
   loginField: {
     width: "100%",

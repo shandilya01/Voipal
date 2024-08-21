@@ -5,6 +5,7 @@ import { Platform, View, ImageBackground, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { AppContextProvider } from './appContextProvider';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Layout() {
     const lastNotificationResponse = Notifications.useLastNotificationResponse();
@@ -50,11 +51,12 @@ export default function Layout() {
 
     return (
         <AppContextProvider>
-            <ImageBackground
-                source={require('../assets/images/background.jpg')} 
+            <LinearGradient
+                colors={['#8EC5FC', '#A1C4FD', '#E0C3FC']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={styles.backgroundImage}
-                resizeMode="cover"
-            >
+                >
                 <StatusBar style="auto" translucent backgroundColor="transparent" />
                 <SafeAreaView style={styles.overlay}>
                     {/* <Stack screenOptions={{ headerShown: false }}>
@@ -65,7 +67,7 @@ export default function Layout() {
                     </Stack> */}
                     <Slot/>
                 </SafeAreaView>
-            </ImageBackground>
+                </LinearGradient>
         </AppContextProvider>
     );
 }

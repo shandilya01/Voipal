@@ -4,7 +4,7 @@ const PostLogin = async(userObj) => {
     try{
         console.log("lgon piost", userObj)
         const resp = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/login`, userObj);
-        console.log("resp",resp)
+        
         return {
             success:true,
             data:resp.data,
@@ -13,7 +13,7 @@ const PostLogin = async(userObj) => {
     }catch (err){
         return {
             success:false,
-            error:(err.message || "Oops! Something wrong from our side!"),
+            error:(err.response?.data?.message || err.message || "Oops! Something wrong from our side!"),
         }
         // console.log("error", err.message)
 
